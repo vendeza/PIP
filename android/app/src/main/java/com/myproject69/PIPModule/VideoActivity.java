@@ -1,6 +1,7 @@
 package com.myproject69.PIPModule;
 
 import android.app.PictureInPictureParams;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,19 +15,35 @@ import com.myproject69.MainApplication;
 
 public class VideoActivity extends AppCompatActivity {
     private static final String TAG = "VideoActivity";
-    private ReactRootView mReactRootView; 
+    private ReactRootView mReactRootView;
     public static VideoActivity currentInstance; // Ссылка на текущий экземпляр активности
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         currentInstance = this; // Устанавливаем текущую активность
+        // Получаем параметры из Intent
+        Intent intent = getIntent();
+        String consultationId = intent.getStringExtra("consultationId");
+        String to = intent.getStringExtra("to");
+        String username = intent.getStringExtra("username");
+
+        Log.d("VideoActivity", "Received parameters: consultationId=" + consultationId +
+                ", to=" + to + ", username=" + username);
+
+        // Подготовка свойств для React-компонента VideoScreen
+        Bundle initialProps = new Bundle();
+        initialProps.putString("consultationId", consultationId);
+        initialProps.putString("to", to);
+        initialProps.putString("username", username);
+
+        // Инициализация ReactRootView и передача начальных параметров
         mReactRootView = new ReactRootView(this);
         mReactRootView.startReactApplication(
                 ((MainApplication) getApplication()).getReactNativeHost().getReactInstanceManager(),
-                "VideoScreen",
-                null
+                "VideoScreen", // Имя React-компонента
+                initialProps // Передача параметров в компонент
         );
+
         setContentView(mReactRootView);
     }
 

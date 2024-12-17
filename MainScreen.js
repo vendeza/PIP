@@ -1,13 +1,14 @@
 import React from 'react';
 import {View, Text, Button, StyleSheet, NativeModules} from 'react-native';
-
-const {PIPModule} = NativeModules;
+import pip from './modules/PIPModule';
 
 const MainScreen = () => {
   const startVideoActivity = () => {
-    if (PIPModule) {
-      PIPModule.startVideoActivity();
-    }
+    pip.startVideoActivity({
+      consultationId: '12345',
+      to: 'John Doe',
+      username: 'doctor_user',
+    });
   };
 
   return (

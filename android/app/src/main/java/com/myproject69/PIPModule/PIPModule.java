@@ -11,6 +11,7 @@ import android.util.Rational;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableMap;
 
 public class PIPModule extends ReactContextBaseJavaModule {
     public PIPModule(ReactApplicationContext reactContext) {
@@ -23,45 +24,30 @@ public class PIPModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void startVideoActivity() {
-        ReactApplicationContext context = getReactApplicationContext();
-        Intent intent = new Intent(context, VideoActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
-    }
+    public void startVideoActivity(ReadableMap params) {
+        try {
+            ReactApplicationContext context = getReactApplicationContext();
+            Intent intent = new Intent(context, VideoActivity.class);
 
-    @ReactMethod
-    public void startPIPMode() {
-        final Activity currentActivity = getCurrentActivity();
+            // Передаем параметры из ReadableMap в Intent
+            if (params.hasKey("consultationId")) {
+                intent.putExtra("consultationId", params.getString("consultationId"));
+            }
+            if (params.hasKey("to")) {
+                intent.putExtra("to", params.getString("to"));
+            }
+            if (params.hasKey("username")) {
+                intent.putExtra("username", params.getString("username"));
+            }
 
-        if (currentActivity != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            currentActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (currentActivity.hasWindowFocus()) { // Проверяем фокус активности
-                                    PictureInPictureParams.Builder pipBuilder = new PictureInPictureParams.Builder();
-                                    pipBuilder.setAspectRatio(new Rational(16, 9)); // Пропорции 16:9
-                                    currentActivity.enterPictureInPictureMode(pipBuilder.build());
-                                } else {
-                                    Log.e("PIPModule", "Activity does not have window focus. Retrying...");
-                                    // Попробуем снова через 500ms
-                                    new Handler().postDelayed(this, 500);
-                                }
-                            }
-                        }, 300);
-                    } catch (IllegalStateException e) {
-                        Log.e("PIPModule", "Failed to enter PIP: " + e.getMessage());
-                    }
-                }
-            });
-        } else {
-            Log.e("PIPModule", "Current activity is null or API level is below 26");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            Log.d("PIPModule", "Started VideoActivity with params: " + params);
+        } catch (Exception e) {
+            Log.e("PIPModule", "Failed to start VideoActivity: " + e.getMessage());
         }
     }
+
 
     @ReactMethod
     public void enterPIPModeDirectly() {
