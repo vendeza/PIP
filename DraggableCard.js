@@ -31,9 +31,17 @@ const DragAndDropCard = ({heading, paragraph}) => {
       ],
       {useNativeDriver: false},
     ),
-    onPanResponderRelease: () => {
+    onPanResponderRelease: (e, gestureState) => {
       setDragging(false);
       position.flattenOffset();
+
+      const {dx, dy} = gestureState;
+      if (Math.abs(dx) < 5 && Math.abs(dy) < 5) {
+        // Если жест был коротким — это "тап"
+        if (scale !== 1) {
+          resetScale();
+        }
+      }
     },
   });
 
@@ -47,22 +55,22 @@ const DragAndDropCard = ({heading, paragraph}) => {
 
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={[
-          styles.card,
-          {
-            transform: [...position.getTranslateTransform(), {scale}],
-            opacity: dragging ? 0.8 : 1,
-          },
-        ]}
-        {...panResponder.panHandlers}
-        onPress={scale !== 1 ? resetScale : null}>
-        <Text style={styles.heading}>{heading}</Text>
-        <Text style={styles.paragraph}>{paragraph}</Text>
-        <TouchableOpacity style={styles.button} onPress={reduceScale}>
-          <Text style={styles.buttonText}>Reduce Scale</Text>
-        </TouchableOpacity>
-      </Animated.View>
+
+        <Animated.View
+          style={[
+            styles.card,
+            {
+              transform: [...position.getTranslateTransform(), {scale}],
+              opacity: dragging ? 0.8 : 1,
+            },
+          ]}
+          {...panResponder.panHandlers}>
+          <Text style={styles.heading}>{heading}</Text>
+          <Text style={styles.paragraph}>{paragraph}</Text>
+          <TouchableOpacity style={styles.button} onPress={reduceScale}>
+            <Text style={styles.buttonText}>Reduce Scale</Text>
+          </TouchableOpacity>
+        </Animated.View>
     </View>
   );
 };
