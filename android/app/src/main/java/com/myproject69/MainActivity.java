@@ -5,6 +5,8 @@ import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
 import com.myproject69.PIPModule.PIPModule;
 
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -25,11 +27,6 @@ public class MainActivity extends ReactActivity {
         super.onCreate(null);
     }
 
-    @Override
-    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
-        super.onPictureInPictureModeChanged(isInPictureInPictureMode);
-        //PipAndroidModule.pipModeChanged(isInPictureInPictureMode);
-    }
 
     /**
      * Returns the instance of the {@link ReactActivityDelegate}. There the RootView is created and
@@ -41,7 +38,7 @@ public class MainActivity extends ReactActivity {
         return new MainActivityDelegate(this, getMainComponentName());
     }
 
-    @Override
+   @Override
     public void onUserLeaveHint() {
         super.onUserLeaveHint();
 
@@ -56,6 +53,27 @@ public class MainActivity extends ReactActivity {
             pipModule.enterPiPIfPossible();
         } else {
             Log.e(TAG, "PipModule is null. Cannot attempt PiP.");
+        }
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode, Configuration newConfig) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+        }
+        Log.d(TAG, "PiP mode changed: " + isInPictureInPictureMode);
+
+        // Отправить событие в React Native
+        PIPModule pipModule = (PIPModule) getReactNativeHost()
+                .getReactInstanceManager()
+                .getCurrentReactContext()
+                .getNativeModule(PIPModule.class);
+
+        if (pipModule != null) {
+            pipModule.sendEventToReact(
+                    isInPictureInPictureMode ? "onEnterPiP" : "onExitPiP",
+                    null
+            );
         }
     }
 

@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {Modal, Button, View, Text} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Modal, Button, View, Text, DeviceEventEmitter} from 'react-native';
 import PIPModule from './PIPModule';
 
 const MainScreen = () => {
@@ -14,7 +14,20 @@ const MainScreen = () => {
     setModalVisible(false);
     PIPModule.setModalActive(false); // Уведомляем нативный код
   };
+  useEffect(() => {
+    const onEnterPiP = DeviceEventEmitter.addListener('onEnterPiP', () => {
+      console.log('App has entered Picture-in-Picture mode');
+    });
 
+    const onExitPiP = DeviceEventEmitter.addListener('onExitPiP', () => {
+      console.log('App has exited Picture-in-Picture mode');
+    });
+
+    return () => {
+      onEnterPiP.remove();
+      onExitPiP.remove();
+    };
+  }, []);
   return (
     <View>
       <Button title="Open Modal" onPress={openModal} />

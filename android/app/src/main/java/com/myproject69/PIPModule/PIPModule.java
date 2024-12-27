@@ -9,6 +9,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 @ReactModule(name = "PIPModule")
 public class PIPModule extends ReactContextBaseJavaModule {
@@ -42,11 +43,27 @@ public class PIPModule extends ReactContextBaseJavaModule {
 
             if (getCurrentActivity() != null) {
                 getCurrentActivity().enterPictureInPictureMode(pipBuilder.build());
+                 sendEventToReact("onEnterPiP", null);
             } else {
                 Log.e(TAG, "Failed to enter PiP: Current activity is null.");
             }
         } else {
             Log.d(TAG, "PiP not entered. Either modal is not active or API level is below 26.");
+        }
+    }
+
+    public void sendEventToReact(String eventName, Object eventData) {
+        ReactApplicationContext reactContext = getReactApplicationContext();
+        if (reactContext != null && reactContext.getCurrentActivity() != null) {
+            try {
+                reactContext
+                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                        .emit(eventName, eventData);
+            } catch (Exception e) {
+                Log.e(TAG, "Error sending event: " + eventName, e);
+            }
+        } else {
+            Log.e(TAG, "React context or current activity is null. Event not sent: " + eventName);
         }
     }
 }
