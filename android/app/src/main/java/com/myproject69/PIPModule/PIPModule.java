@@ -1,82 +1,52 @@
 package com.myproject69.PIPModule;
 
-import android.app.Activity;
 import android.app.PictureInPictureParams;
-import android.content.Intent;
 import android.os.Build;
-import android.os.Handler;
 import android.util.Log;
 import android.util.Rational;
-
+import androidx.annotation.NonNull;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.module.annotations.ReactModule;
 
+@ReactModule(name = "PIPModule")
 public class PIPModule extends ReactContextBaseJavaModule {
-    public PIPModule(ReactApplicationContext reactContext) {
+
+    private static final String TAG = "PipModule";
+    private boolean isModalActive = false;
+    public PIPModule(@NonNull ReactApplicationContext reactContext) {
         super(reactContext);
     }
 
+    @NonNull
     @Override
     public String getName() {
         return "PIPModule";
     }
 
+    // Метод для включения флага
     @ReactMethod
-    public void startVideoActivity() {
-        ReactApplicationContext context = getReactApplicationContext();
-        Intent intent = new Intent(context, VideoActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+    public void setModalActive(boolean isActive) {
+        isModalActive = isActive;
+        Log.d(TAG, "setModalActive called. Modal active: " + isActive);
     }
 
-    @ReactMethod
-    public void startPIPMode() {
-        final Activity currentActivity = getCurrentActivity();
+    public void enterPiPIfPossible() {
+        Log.d(TAG, "Checking if PiP is possible. Modal active: " + isModalActive);
+        if (isModalActive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(TAG, "Entering Picture-in-Picture mode.");
+            PictureInPictureParams.Builder pipBuilder = new PictureInPictureParams.Builder();
+            Rational aspectRatio = new Rational(16, 9); // Установите пропорции
+            pipBuilder.setAspectRatio(aspectRatio);
 
-        if (currentActivity != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            currentActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (currentActivity.hasWindowFocus()) { // Проверяем фокус активности
-                                    PictureInPictureParams.Builder pipBuilder = new PictureInPictureParams.Builder();
-                                    pipBuilder.setAspectRatio(new Rational(16, 9)); // Пропорции 16:9
-                                    currentActivity.enterPictureInPictureMode(pipBuilder.build());
-                                } else {
-                                    Log.e("PIPModule", "Activity does not have window focus. Retrying...");
-                                    // Попробуем снова через 500ms
-                                    new Handler().postDelayed(this, 500);
-                                }
-                            }
-                        }, 300);
-                    } catch (IllegalStateException e) {
-                        Log.e("PIPModule", "Failed to enter PIP: " + e.getMessage());
-                    }
-                }
-            });
-        } else {
-            Log.e("PIPModule", "Current activity is null or API level is below 26");
-        }
-    }
-
-    @ReactMethod
-    public void enterPIPModeDirectly() {
-        VideoActivity currentActivity = VideoActivity.currentInstance; // Используем текущую активность напрямую
-
-        if (currentActivity != null) {
-            try {
-                currentActivity.enterPIPModeDirectly();
-                Log.d("PIPModule", "Successfully called enterPIPModeDirectly");
-            } catch (Exception e) {
-                Log.e("PIPModule", "Failed to call enterPIPModeDirectly: " + e.getMessage());
+            if (getCurrentActivity() != null) {
+                getCurrentActivity().enterPictureInPictureMode(pipBuilder.build());
+            } else {
+                Log.e(TAG, "Failed to enter PiP: Current activity is null.");
             }
         } else {
-            Log.e("PIPModule", "Current activity is null или это не VideoActivity");
+            Log.d(TAG, "PiP not entered. Either modal is not active or API level is below 26.");
         }
     }
-
 }

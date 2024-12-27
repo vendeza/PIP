@@ -1,34 +1,31 @@
-import React from 'react';
-import {View, Text, Button, StyleSheet, NativeModules} from 'react-native';
-
-const {PIPModule} = NativeModules;
+import React, {useState} from 'react';
+import {Modal, Button, View, Text} from 'react-native';
+import PIPModule from './PIPModule';
 
 const MainScreen = () => {
-  const startVideoActivity = () => {
-    if (PIPModule) {
-      PIPModule.startVideoActivity();
-    }
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const openModal = () => {
+    setModalVisible(true);
+    PIPModule.setModalActive(true); // Уведомляем нативный код
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    PIPModule.setModalActive(false); // Уведомляем нативный код
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Это основной экран</Text>
-      <Button title="Перейти к Видео" onPress={startVideoActivity} />
+    <View>
+      <Button title="Open Modal" onPress={openModal} />
+      <Modal visible={isModalVisible} animationType="slide">
+        <View>
+          <Text>This is a modal!</Text>
+          <Button title="Close Modal" onPress={closeModal} />
+        </View>
+      </Modal>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f2f2f2',
-  },
-  title: {
-    fontSize: 20,
-    marginBottom: 20,
-  },
-});
 
 export default MainScreen;
