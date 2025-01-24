@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Portal } from '@gorhom/portal';
 import { DeviceEventEmitter, Dimensions, Platform, StyleSheet, View } from 'react-native';
 import VoxImplantCallScreenRoot from "./VoxImplantCallScreenRoot";
+import PIPModule from "../PIPModule";
 
 
 
@@ -29,7 +30,9 @@ const GlobalModal = () => {
         };
     }, []);
 
-
+    useEffect(() => {
+        PIPModule.setModalActive(true);
+    }, []);
 
     return (
         <Portal>

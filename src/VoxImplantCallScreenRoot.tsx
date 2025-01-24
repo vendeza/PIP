@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useState } from 'react';
-import { Animated, Button, Dimensions, StyleProp, StyleSheet, ViewStyle } from 'react-native';
+import { Animated, Button, Dimensions,  StyleSheet } from 'react-native';
 import {
     PanGestureHandler,
     State,
@@ -8,14 +8,10 @@ import {
     PanGestureHandlerStateChangeEvent,
 } from 'react-native-gesture-handler';
 
-type DraggableBoxProps = {
-    minDist?: number;
-    boxStyle?: StyleProp<ViewStyle>;
-};
 
 const { width, height } = Dimensions.get('window');
 
-const DraggableBox: React.FC<DraggableBoxProps> = ({ minDist, boxStyle }) => {
+const DraggableBox: React.FC = () => {
     const translateX = useRef(new Animated.Value(0)).current;
     const translateY = useRef(new Animated.Value(0)).current;
     const lastOffset = useRef({ x: 0, y: 0 }).current;
