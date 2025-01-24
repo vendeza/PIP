@@ -10,22 +10,28 @@ import {
 import MainScreen from './MainScreen';
 import VideoScreen from './VideoScreen';
 import {enableScreens} from 'react-native-screens';
-import { createStackNavigator } from '@react-navigation/stack';
+import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
+import {PortalProvider} from '@gorhom/portal';
+import GlobalModal from './src/GlobalModal';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 enableScreens(); // Включение оптимизации экранов
 
 const Stack = createStackNavigator();
 const App = () => {
   return (
-
+    <GestureHandlerRootView>
       <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="MainScreen" component={MainScreen} />
-          {/*<Stack.Screen name="VideoScreen" component={VideoScreen} />*/}
-        </Stack.Navigator>
+        <PortalProvider>
+          <Stack.Navigator>
+            <Stack.Screen name="MainScreen" component={MainScreen} />
+            {/*<Stack.Screen name="VideoScreen" component={VideoScreen} />*/}
+          </Stack.Navigator>
+          <GlobalModal />
+        </PortalProvider>
       </NavigationContainer>
-
+    </GestureHandlerRootView>
   );
 };
 

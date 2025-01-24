@@ -1,8 +1,14 @@
-import { NativeModules } from 'react-native';
+import {NativeModules, Platform} from 'react-native';
 
 const { PIPModule } = NativeModules;
 
 const setModalActive = (isActive) => {
+
+
+    if(Platform.OS ==='ios'){
+        return;
+    }
+
     if (PIPModule && typeof PIPModule.setModalActive === 'function') {
         console.log(`setModalActive called with value: ${isActive}`);
         PIPModule.setModalActive(isActive);
